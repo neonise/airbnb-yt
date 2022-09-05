@@ -3,8 +3,9 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useRouter } from "next/router";
 import { format } from "date-fns";
+import InfoCard from "../components/InfoCard";
 
-function Search() {
+function Search({ searchResults }) {
   const router = useRouter();
   const { location, startDate, endDate, noOfGuests } = router.query;
   const formattedStartDate = format(new Date(startDate), "dd MMMM yy");
@@ -13,7 +14,7 @@ function Search() {
 
   return (
     <div>
-      <Header />
+      <Header placeholder={`${location} | ${range} | ${noOfGuests} quests`} />
 
       <div className="flex">
         <section className="flex-grow pt-14 px-6">
@@ -31,6 +32,23 @@ function Search() {
             <p className="button">Rooms and beds</p>
             <p className="button">More filters</p>
           </div>
+
+          <div className="flex flex-col">
+            {searchResults?.map(
+              ({ img, location, title, description, star, price, total }) => (
+                <InfoCard
+                  key={title}
+                  img={img}
+                  location={location}
+                  title={title}
+                  description={description}
+                  star={star}
+                  price={price}
+                  total={total}
+                />
+              )
+            )}
+          </div>
         </section>
       </div>
 
@@ -40,3 +58,13 @@ function Search() {
 }
 
 export default Search;
+
+export async function getServerSideProps() {
+  const searchResults = await fetch("http://localhost:3000/searchs.json").then(
+    (res) => res.json()
+  );
+
+  return {
+    props: { searchResults },
+  };
+}
